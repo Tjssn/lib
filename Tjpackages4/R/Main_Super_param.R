@@ -225,9 +225,11 @@ super_param <- function(
                  "有效/缺失", "变量值", "变量值域", "domain", "domain_rank")
 
   # 检查必要的包
-  if (!requireNamespace("flextable", quietly = TRUE)) {
-    warning(paste0(icon_warning, " flextable包未安装,表格可视化功能将受限"))
-  }
+if (!requireNamespace("flextable", quietly = TRUE)) {
+  warning("flextable包未安装，正在从CRAN下载安装...")
+  install.packages("flextable", repos = "https://cran.r-project.org")
+}
+library(flextable)
 
   # 检查输入数据有效性
   if (!inherits(data, "data.frame")) {
