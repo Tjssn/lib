@@ -85,7 +85,7 @@
 #'   data_list = GBTM_Model2$result$table$model.res,
 #'   output_path = "DATAA23.docx"
 #' )
-
+#' @export
 
 TJword <- function(
     model_list = NULL,
