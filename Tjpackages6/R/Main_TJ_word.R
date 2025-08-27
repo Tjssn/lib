@@ -117,7 +117,7 @@ TJword <- function(
   model_defaults <- list()
   if (!is.null(model_list) && "result" %in% names(model_list) && "output.infor" %in% names(model_list[["result"]])) {
     output_infor <- model_list[["result"]][["output.infor"]]
-    model_defaults$table_comments <- if ("my_annotations" %in% names(output_infor)) output_infor[["my_annotations"]] else NULL
+    model_defaults$table_comments <- if ("table_comments" %in% names(output_infor)) output_infor[["table_comments"]] else NULL
     model_defaults$introduction <- if ("introduction" %in% names(output_infor)) output_infor[["introduction"]] else ""
     model_defaults$text_comments <- if ("text_comments" %in% names(output_infor)) output_infor[["text_comments"]] else NULL
   }
