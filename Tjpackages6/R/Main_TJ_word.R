@@ -94,6 +94,9 @@ TJword <- function(
     table_comments = NULL,
     introduction = "",
     text_comments = NULL,
+    hline.bottom.table=1.0,
+    hline.top.table=1.0,
+    hline.midddle.table=0.5,
     text.title.size = 14,
     text.intro.size = 12,
     text.textcom.size = 12,
@@ -224,9 +227,12 @@ TJword <- function(
     # 5.4 生成表格（关键修复：用%>%连接每个函数，传递表格对象x）
     ft <- flextable(df) %>%
       border_remove() %>%
-      hline_top(part = "all", border = fp_border(color = "black", width = 1.5)) %>%
-      hline_bottom(part = "header", border = fp_border(color = "black", width = 0.75)) %>%
-      hline_bottom(part = "all", border = fp_border(color = "black", width = 1.5)) %>%
+    #hline.bottom.table=1.0,
+   # hline.top.table=1.0,
+   # hline.midddle.table=0.5,
+      hline_top(part = "all", border = fp_border(color = "black", width =hline.top.table)) %>%
+      hline_bottom(part = "header", border = fp_border(color = "black", width =  hline.midddle.table)) %>%
+      hline_bottom(part = "all", border = fp_border(color = "black", width = hline.bottom.table)) %>%
       # 修复：补充%>%，让表格对象传递给font函数（x参数自动填充）
       font(part = "all", fontname = text.table.content.family) %>%
       # 修复：补充%>%，让表格对象传递给fontsize函数（x参数自动填充）
