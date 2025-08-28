@@ -1,4 +1,4 @@
-#' TJword
+#' TjssnWord
 #'
 #' 从数据列表或模型对象中提取信息，生成标准化Word格式统计分析报告，支持报告标题、正文、表格前置说明、
 #' 三线表格式表格、表注的完整内容构建，并提供灵活的格式自定义功能（字体类型、字号、行距、表格内边距）。
@@ -87,7 +87,7 @@
 #' )
 #' @export
 
-TJword <- function(
+TjssnWord <- function(
     model_list = NULL,
     data_list = NULL,
     output_path,
@@ -96,7 +96,7 @@ TJword <- function(
     text_comments = NULL,
     hline.bottom.table=1.5,
     hline.top.table=1.5,
-    hline.midddle.table=0.75,
+    hline.middle.table=0.75,
     text.title.size = 14,
     text.intro.size = 12,
     text.textcom.size = 12,
@@ -229,10 +229,10 @@ TJword <- function(
       border_remove() %>%
     #hline.bottom.table=1.0,
    # hline.top.table=1.0,
-   # hline.midddle.table=0.5,
+   # hline.middle.table=0.5,
       hline_top(part = "all", border = fp_border(color = "black", width =hline.top.table)) %>%
-      hline_bottom(part = "header", border = fp_border(color = "black", width =  hline.midddle.table)) %>%
       hline_bottom(part = "all", border = fp_border(color = "black", width = hline.bottom.table)) %>%
+      hline_bottom(part = "header", border = fp_border(color = "black", width =  hline.middle.table)) %>%
       # 修复：补充%>%，让表格对象传递给font函数（x参数自动填充）
       font(part = "all", fontname = text.table.content.family) %>%
       # 修复：补充%>%，让表格对象传递给fontsize函数（x参数自动填充）
