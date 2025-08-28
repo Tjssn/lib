@@ -1,4 +1,4 @@
-#' TJstats
+#' TJssnStat
 #'
 #'
 #' @param Stat 字符型，指定分析模型类型。常用值包括"Summary"（默认，描述性统计与组间比较）、
@@ -83,7 +83,7 @@
 #' }
 #'
 #' @export
-TJstats <- function (Stat = "Help", Object = "Param1", data_param = NULL,
+TJssnStat <- function (Stat = "Help", Object = "Param1", data_param = NULL,
                      var_param = NULL, model_param = NULL, output_param = NULL,
                      pack_param = NULL, logprint = T,plotprint=T, .call = NULL)
 {
