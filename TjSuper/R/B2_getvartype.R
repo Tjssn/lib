@@ -154,7 +154,7 @@ Tj_rename_duplicate_col <- function(data, log) {
 
   if (!all(new_names == original_names)) {
     names(data) <- new_names
-    n_changed <- sum(new_names != original_n ames)
+    n_changed <- sum(new_names != original_names)
     log <- c(log, paste("列名重命名完成，共修改", n_changed, "列"))
   } else {
     log <- c(log, "未检测到需要重命名的重复列名")
