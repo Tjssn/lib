@@ -165,7 +165,7 @@ SuperView <- function(
     keep_cols = NULL,              # 保留指定变量（优先级高于drop_cols）
     drop_cols = NULL,              # 删除指定变量
     # 命名与标签
-    rename_theme = c("unicode", "normal", "original"),  # 变量命名规则
+    rename_theme = c("normal", "original","unicode"),  # 变量命名规则
     rename = NULL,                 # 自定义变量重命名（命名向量：原名=新名）
     relabel = NULL,                # 自定义变量标签（命名向量：变量名=标签）
     # 类型转换（R用户手动设置，优先级最高）

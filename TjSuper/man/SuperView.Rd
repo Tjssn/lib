@@ -8,7 +8,7 @@ SuperView(
   data,
   keep_cols = NULL,
   drop_cols = NULL,
-  rename_theme = c("unicode", "normal", "original"),
+  rename_theme = c("normal", "original", "unicode"),
   rename = NULL,
   relabel = NULL,
   retype.factor = NULL,

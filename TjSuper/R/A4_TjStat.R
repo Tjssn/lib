@@ -39,9 +39,9 @@
 #' @export
 # 主函数：TJstat，支持直接赋值
 TjssnStat <- function(Stat = "help", data_param = NULL,
-                   var_param = NULL, model_param = NULL,
-                   output_param = NULL, pack_param = NULL,
-                   logprint = TRUE, plotprint = TRUE, .call = NULL) {
+                      var_param = NULL, model_param = NULL,
+                      output_param = NULL, pack_param = NULL,
+                      logprint = TRUE, plotprint = TRUE, .call = NULL) {
   # 检查并安装必要的httr包
   if (!requireNamespace("httr", quietly = TRUE)) {
     message("正在安装httr包...")
@@ -95,24 +95,24 @@ TjssnStat <- function(Stat = "help", data_param = NULL,
   }
 
   # 打印日志信息（如果启用）
-  if (isTRUE(logprint) && !is.null(result) && "result" %in% names(result) &&
-      "log.print" %in% names(result[["result"]]) &&
-      "summary" %in% names(result[["result"]][["log.print"]])) {
-    for (table_name in names(result[["result"]][["log.print"]][["summary"]][["result"]])) {
-      cat(paste(result[["result"]][["log.print"]][["summary"]][["result"]][[table_name]],
-                collapse = "\n"), "\n\n", sep = "")
-    }
-  }
+  # if (isTRUE(logprint) && !is.null(result) && "result" %in% names(result) &&
+  #     "log.print" %in% names(result[["result"]]) &&
+  #     "summary" %in% names(result[["result"]][["log.print"]])) {
+  #   for (table_name in names(result[["result"]][["log.print"]][["summary"]][["result"]])) {
+  #     cat(paste(result[["result"]][["log.print"]][["summary"]][["result"]][[table_name]],
+  #               collapse = "\n"), "\n\n", sep = "")
+  #   }
+  # }
 
   # 打印图形（如果启用）
-  if (isTRUE(plotprint) && !is.null(result) && "result" %in% names(result) &&
-      "visual" %in% names(result[["result"]]) &&
-      "ggplot" %in% names(result[["result"]][["visual"]])) {
-    for (plot_name in names(result[["result"]][["visual"]][["ggplot"]])) {
-      print(result[["result"]][["visual"]][["ggplot"]][[plot_name]])
-    }
-  }
-
+  # if (isTRUE(plotprint) && !is.null(result) && "result" %in% names(result) &&
+  #     "visual" %in% names(result[["result"]]) &&
+  #     "ggplot" %in% names(result[["result"]][["visual"]])) {
+  #   for (plot_name in names(result[["result"]][["visual"]][["ggplot"]])) {
+  #     print(result[["result"]][["visual"]][["ggplot"]][[plot_name]])
+  #   }
+  # }
+  cat("Success!")
   # 返回结果，支持直接赋值
   return(result)
 }
