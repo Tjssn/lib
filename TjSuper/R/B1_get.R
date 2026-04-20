@@ -4,7 +4,7 @@ get_device_id2 <- function ()
   os <- Sys.info()["sysname"]
   uuid <- character(0)
   if (os == "Windows") {
-    cmd <- "wmic csproduct get uuid"
+    cmd <- 'powershell -Command "(Get-CimInstance Win32_ComputerSystemProduct).UUID"'
     result <- system(cmd, intern = TRUE)
     valid_lines <- trimws(result[!result %in% c("", "UUID")])
     uuid <- if (length(valid_lines) > 0)
