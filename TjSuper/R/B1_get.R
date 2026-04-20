@@ -8,7 +8,7 @@ get_device_id2 <- function ()
     result <- system(cmd, intern = TRUE)
     valid_lines <- trimws(result[!result %in% c("", "UUID")])
     uuid <- if (length(valid_lines) > 0)
-      valid_lines[2]
+      valid_lines[1]
     else ""
   }
   else if (os == "Darwin") {
