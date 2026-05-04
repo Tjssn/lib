@@ -42,19 +42,17 @@ TjssnStat <- function(Stat = "help", data_param = NULL,
                       var_param = NULL, model_param = NULL,
                       output_param = NULL, pack_param = NULL,
                       logprint = TRUE, plotprint = TRUE, .call = NULL) {
-  # 检查并安装必要的httr包
+
   if (!requireNamespace("httr", quietly = TRUE)) {
     message("正在安装httr包...")
     install.packages("httr", dependencies = TRUE, repos = "https://cloud.r-project.org/")
   }
   library(httr)
 
-  # 设置默认调用参数
   if (is.null(.call)) {
     .call <- "RRR"
   }
 
-  # 打包所有参数信息
   pack_infor <- list(
     Stat = Stat,
     data_param = data_param,
@@ -65,31 +63,24 @@ TjssnStat <- function(Stat = "help", data_param = NULL,
     .call = .call
   )
 
-  # 保存参数到临时文件
   script_dir <- if (!is.null(rstudioapi::getSourceEditorContext())) {
     dirname(rstudioapi::getSourceEditorContext()$path)
   } else {
-    getwd()  # 非RStudio环境下使用当前工作目录
+    getwd()  
   }
   file_path <- file.path(script_dir, "send_docu1.rda")
   save(pack_infor, file = file_path, version = 2)
 
-  # 记录开始时间
   start_time <- Sys.time()
 
-  # 发送请求并获取结果（直接接收返回值）
   result <- tryCatch({
     TJanalysis.response(file = file_path)
   }, error = function(e) {
-    # 发生错误时返回NULL
     NULL
   })
-  # 计算耗时
+
   end_time <- Sys.time()
   time_elapsed <- difftime(end_time, start_time, units = "secs")
-  # cat("\n耗时:", time_elapsed, "秒\n")
-
-  # 清理临时文件
   if (file.exists(file_path)) {
     unlink(file_path)
   }
@@ -112,7 +103,6 @@ TjssnStat <- function(Stat = "help", data_param = NULL,
   #     print(result[["result"]][["visual"]][["ggplot"]][[plot_name]])
   #   }
   # }
-  cat("Success!")
   # 返回结果，支持直接赋值
   return(result)
 }
