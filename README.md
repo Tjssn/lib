@@ -1,7 +1,7 @@
-# TjSuper Super.Table1 客户教程
+# TjSuper Super.Table 客户教程
 
 `TjSuper::TjssnStat()` 是面向医学统计场景的统一分析接口。  
-`Super.Table1` 主要用于生成医学论文、临床研究、心理学、公卫、护理、检验等场景中的 Table 1。
+`Super.Table` 主要用于生成医学论文、临床研究、心理学、公卫、护理、检验等场景中的 Table 1。
 
 适用功能包括：
 
@@ -23,7 +23,7 @@
 
 ```r
 RESSUB <- TjSuper::TjssnStat(
-  Stat = "Super.Table1",
+  Stat = "Super.Table",
 
   data_param = list(
     data = df
@@ -58,7 +58,7 @@ cat(RESSUB$result$log.print$Quick.Check.Text)
 
 ## 3. 四大参数块
 
-`Super.Table1` 推荐按四个参数块理解：
+`Super.Table` 推荐按四个参数块理解：
 
 | 参数块 | 作用 | 常用参数 |
 |---|---|---|
@@ -174,7 +174,7 @@ model_param = list(
 
 ```r
 RESSUB <- TjSuper::TjssnStat(
-  Stat = "Super.Table1",
+  Stat = "Super.Table",
 
   data_param = list(
     data = df
@@ -201,7 +201,7 @@ RES$Result$CHR2$cross_table
 
 ```r
 RESSUB <- TjSuper::TjssnStat(
-  Stat = "Super.Table1",
+  Stat = "Super.Table",
 
   data_param = list(
     data = df
@@ -333,7 +333,7 @@ output_param = list(
 
 ```r
 RESSUB <- TjSuper::TjssnStat(
-  Stat = "Super.Table1",
+  Stat = "Super.Table",
 
   data_param = list(
     data = df
@@ -370,7 +370,7 @@ RESSUB <- TjSuper::TjssnStat(
 
 ```r
 RESSUB <- TjSuper::TjssnStat(
-  Stat = "Super.Table1",
+  Stat = "Super.Table",
 
   data_param = list(
     data = df
@@ -465,7 +465,7 @@ RESSUB$result$log.print$Quick.Check$No.P.Value
 
 ```r
 RESSUB <- TjSuper::TjssnStat(
-  Stat = "Super.Table1",
+  Stat = "Super.Table",
 
   data_param = list(
     data = df
@@ -501,83 +501,7 @@ cat(RESSUB$result$log.print$Quick.Check.Text)
 
 ---
 
-## 20. 常见问题
-
-### 为什么 GitHub README 不能显示 React 页面？
-
-因为 GitHub README 只支持 Markdown 和部分 HTML，不会执行 React 代码。
-
-以下内容不能直接放进 README：
-
-```js
-import React from "react";
-import { motion } from "framer-motion";
-import { Activity } from "lucide-react";
-
-export default function App() {
-  return <div>Hello</div>;
-}
-```
-
-如果要做 React 网页，请使用 Vite / React 项目，并部署到 GitHub Pages。
-
-### README 里应该放什么？
-
-README 应该放：
-
-- 项目介绍
-- 安装方法
-- 快速开始代码
-- 参数说明
-- 示例
-- 常见问题
-
-不应该直接放完整 React 组件代码。
-
----
-
-## 21. 本地开发建议
-
-如果后续要做成漂亮网页，推荐使用以下结构：
-
-```text
-lib/
-  README.md
-  package.json
-  index.html
-  src/
-    main.jsx
-    App.jsx
-    index.css
-```
-
-React 页面代码应放在：
-
-```text
-src/App.jsx
-```
-
-而不是：
-
-```text
-README.md
-```
-
----
-
-## 22. 安装与运行示例
-
-如果做 React 文档站，可使用：
-
-```bash
-npm install
-npm run dev
-```
-
-如果只是 GitHub README 文档，则无需安装，直接维护本文件即可。
-
----
 
 ## License
 
-Internal documentation for TjSuper Super.Table1.
+Internal documentation for TjSuper Super.Table.
