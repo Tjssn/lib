@@ -41,8 +41,6 @@
     "  • SuperView：数据变量综合处理与信息管理工具\n",
     "    → 查看使用方法：help(SuperView)\n",
     "  • TjssnStats：统计分析核心功能(支持平台集成式分析，功能持续更新)\n",
-    "    → 查看使用方法：help(TjssnStats)\n",
-    "    → 查看可实现的模型分析：TjssnStats(Stat='help')\n",
     "  • SuperWord：生成标准化Word统计报告(支持格式自定义)\n",
     "    → 查看使用方法：help(SuperWord)\n",
     "==========================================="
