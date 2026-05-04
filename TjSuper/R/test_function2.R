@@ -1,0 +1,5 @@
+# devtools::load_all()
+# devtools::document()
+# devtools::test()
+# devtools::check()
+# devtools::document()
