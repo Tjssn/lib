@@ -1,172 +1,132 @@
-#' SuperWord02
+#' 生成中英文双语 Word 统计报告
 #'
-#' 生成结构化 Word 统计分析报告，支持自动插入方法描述、统计方法表、结果解读文本、
-#' 主结果表格以及表注内容，并可统一控制标题、正文、表格、表注的字体、字号、
-#' 行距、页方向和表格边框样式。
+#' `SuperWord.Super.Table()` 用于根据统计分析结果表自动生成 Microsoft Word
+#' 报告。该函数支持中文和英文双语报告布局、自动统计方法文字、
+#' 结果概述、表格标题、表格注释、字体设置、字号设置、行距设置、
+#' 表格边框设置以及页面方向设置。
 #'
-#' `SuperWord02()` 适用于已经完成统计分析、并已整理出标准结果对象的场景。
-#' 函数会将结果对象中的表格内容提取出来，按照“报告标题 → 引言 →
-#' 统计学方法 → 统计方法表 → 各结果模块说明 → 结果表格 → 表注”的顺序，
-#' 输出为 `.docx` Word 报告。
+#' 该函数主要用于将一个或多个交叉表结果整理为规范的 Word 报告。
+#' 输入结果可以来自 `model_list$Result`，也可以直接通过 `data_list`
+#' 提供。
 #'
-#' @section 重要说明:
-#' \itemize{
-#'   \item 当前版本优先从 `model_list$Result` 提取结果表；若未提供，则使用 `data_list`。
-#'   \item `data_list` 或 `model_list$Result` 中的每个元素应包含 `cross_table`，
-#'         函数会使用 `final_data_list[[nm]]$cross_table` 作为最终展示表格。
-#'   \item 当 `report_text` 同时包含 `Methods`、`Results`、`TableNotes` 时，
-#'         才会启用自动文字报告模式。
-#'   \item 当 `show_stat_table = TRUE` 时，`report_text$TableMethod` 不能为空，
-#'         否则函数会报错：`table_method is empty.`。
-#'   \item 参数 `table_comments` 当前版本已保留在接口中，但函数体中尚未实际使用。
-#' }
+#' @param model_list 可选列表。通常为模型或统计分析函数的输出对象。
+#'   如果该对象中包含 `Result` 元素，则函数会使用 `model_list$Result`
+#'   作为报告表格来源。
+#' @param data_list 可选列表。直接提供的统计结果列表。列表中的每个元素
+#'   应包含一个 `cross_table` 数据框，用于生成 Word 报告中的表格。
+#'   当未提供有效的 `model_list$Result` 时，函数会使用 `data_list`。
+#' @param output_path 字符串。生成的 Word 文件保存路径，通常以 `.docx`
+#'   结尾。
+#' @param table_comments 可选列表。每张表格下方额外添加的注释文字。
+#'   如果该列表有名称，名称应与 `data_list` 或 `model_list$Result`
+#'   中的表格名称一致。
+#' @param introduction 字符串。报告开头的引言文字。
+#' @param report_text 可选列表。自动生成的报告文字。若提供，通常应包含
+#'   `Methods`、`Results` 和 `TableNotes` 三个元素，也可以包含
+#'   `TableMethod` 元素。
+#' @param show_stat_table 逻辑值。当 `report_text$TableMethod` 存在时，
+#'   是否在报告中显示统计方法表。默认为 `TRUE`。
 #'
-#' @param model_list 列表，可选。
-#'   结果模型对象。当前版本要求其中包含 `Result` 元素，
-#'   即函数会使用 `model_list$Result` 作为最终表格数据源。
+#' @param hline.bottom.table 数值。表格底部横线的宽度。
+#' @param hline.top.table 数值。表格顶部横线的宽度。
+#' @param hline.middle.table 数值。表头下方横线的宽度。
 #'
-#' @param data_list 列表，可选。
-#'   直接传入的结果表列表。当 `model_list` 不可用时使用。
-#'   通常每个元素应为一个结果对象，且至少包含 `cross_table`，
-#'   例如：
-#'   `list("Table A" = list(cross_table = df1), "Table B" = list(cross_table = df2))`。
+#' @param text.title.size 数值。报告标题的字号。
+#' @param text.heading1.size 数值。一级标题的字号。
+#' @param text.heading2.size 数值。二级标题的字号。
+#' @param text.intro.size 数值。引言和统计方法正文的字号。
+#' @param text.textcom.size 数值。结果概述正文的字号。
+#' @param text.table.caption.size 数值。表格标题的字号。
+#' @param text.table.content.size 数值。表格主体内容的字号。
+#' @param text.table.superscript.size 数值。表格中上标标记的字号，
+#'   例如两两比较标记中的字母或星号。
+#' @param text.table.note.size 数值。表格注释文字的字号。
 #'
-#' @param output_path 字符型，必填。
-#'   输出 Word 文件路径，建议以 `.docx` 结尾，
-#'   例如 `"D:/report/super_table_report.docx"`。
+#' @param line.title.spacing 数值。报告标题的行距。
+#' @param line.heading1.spacing 数值。一级标题的行距。
+#' @param line.heading2.spacing 数值。二级标题的行距。
+#' @param line.intro.spacing 数值。引言和统计方法正文的行距。
+#' @param line.textcom.spacing 数值。结果概述正文的行距。
+#' @param line.caption.spacing 数值。表格标题的行距。
+#' @param line.table.note.spacing 数值。表格注释文字的行距。
 #'
-#' @param table_comments 列表，可选。
-#'   预留参数。当前版本函数体中尚未实际使用该参数。
+#' @param text.title.family 字符串。报告标题字体。默认为
+#'   `"Times New Roman"`。
+#' @param text.heading1.family 字符串。一级标题字体。
+#' @param text.heading2.family 字符串。二级标题字体。
+#' @param text.intro.family 字符串。引言和统计方法正文字体。
+#' @param text.textcom.family 字符串。结果概述正文字体。
+#' @param text.table.caption.family 字符串。表格标题字体。
+#' @param text.table.content.family 字符串。表格主体内容字体。
+#' @param text.table.note.family 字符串。表格注释字体。
 #'
-#' @param introduction 字符型，默认 `""`。
-#'   报告开头的引言或背景描述文字。若为空则不写入引言部分。
-#'
-#' @param report_text 列表，可选。
-#'   自动文字报告对象。若包含 `Methods`、`Results`、`TableNotes`
-#'   三个命名元素，则启用自动报告模式。
-#'
-#'   推荐结构如下：
-#'   \describe{
-#'     \item{Methods}{统计方法部分。可包含：
-#'       `heading1`、`chinese`、`english`}
-#'     \item{TableMethod}{统计方法表列表。仅在 `show_stat_table = TRUE` 时使用；
-#'       每个元素应为 data.frame}
-#'     \item{Results}{各结果模块的说明文字列表。
-#'       每个表名下可包含 `chinese` 和 `english`}
-#'     \item{TableNotes}{各结果表的表注列表。
-#'       每个表名下可包含 `chinese` 和 `english`}
-#'   }
-#'
-#' @param show_stat_table 逻辑值，默认 `TRUE`。
-#'   是否在 Word 报告中插入“统计方法表”。
-#'   若为 `TRUE`，则要求 `report_text$TableMethod` 存在且非空。
-#'
-#' @param hline.bottom.table 数值，默认 `1.5`。
-#'   表格底部边框线宽。
-#'
-#' @param hline.top.table 数值，默认 `1.5`。
-#'   表格顶部边框线宽。
-#'
-#' @param hline.middle.table 数值，默认 `0.75`。
-#'   表头下方中间横线线宽。
-#'
-#' @param text.title.size 报告总标题字号，默认 `14`。
-#' @param text.heading1.size 一级标题字号，默认 `13`。
-#' @param text.heading2.size 二级标题字号，默认 `12`。
-#' @param text.intro.size 引言正文字号，默认 `12`。
-#' @param text.textcom.size 结果说明文字字号，默认 `12`。
-#' @param text.table.caption.size 表题字号，默认 `12`。
-#' @param text.table.content.size 表格内容字号，默认 `11`。
-#' @param text.table.note.size 表注字号，默认 `10`。
-#'
-#' @param line.title.spacing 报告总标题行距，默认 `1`。
-#' @param line.heading1.spacing 一级标题行距，默认 `1.2`。
-#' @param line.heading2.spacing 二级标题行距，默认 `1.1`。
-#' @param line.intro.spacing 引言正文行距，默认 `1.3`。
-#' @param line.textcom.spacing 结果说明文字行距，默认 `1.3`。
-#' @param line.caption.spacing 表题行距，默认 `1`。
-#' @param line.table.note.spacing 表注行距，默认 `1.2`。
-#'
-#' @param text.title.family 报告总标题字体，默认 `"Times New Roman"`。
-#' @param text.heading1.family 一级标题字体，默认 `"Times New Roman"`。
-#' @param text.heading2.family 二级标题字体，默认 `"Times New Roman"`。
-#' @param text.intro.family 引言字体，默认 `"Times New Roman"`。
-#' @param text.textcom.family 结果说明文字字体，默认 `"Times New Roman"`。
-#' @param text.table.caption.family 表题字体，默认 `"Times New Roman"`。
-#' @param text.table.content.family 表格内容字体，默认 `"Times New Roman"`。
-#' @param text.table.note.family 表注字体，默认 `"Times New Roman"`。
-#'
-#' @param pad.table.cell 数值，默认 `1`。
-#'   表格单元格内边距。
-#'
-#' @param page_orientation 页面方向，默认 `c("portrait", "landscape")`。
-#'   可选 `"portrait"` 或 `"landscape"`，内部通过 `match.arg()` 匹配。
+#' @param pad.table.cell 数值。Word 表格单元格内边距。
+#' @param page_orientation 字符串。页面方向，可选 `"portrait"` 或
+#'   `"landscape"`。`"portrait"` 表示纵向页面，`"landscape"` 表示横向页面。
+#' @param bilingual_layout 字符串。双语报告布局方式，可选
+#'   `"cn_then_en"` 或 `"legacy"`。`"cn_then_en"` 表示先生成中文部分，
+#'   如果存在英文内容，再生成英文部分；`"legacy"` 表示兼容旧版本的
+#'   紧凑布局。
+#' @param repeat_tables_in_english 逻辑值。是否在英文部分重复显示详细表格。
+#'   默认为 `FALSE`。当设为 `FALSE` 时，英文部分通常只显示文字说明，
+#'   并提示详细表格见中文部分。
 #'
 #' @details
-#' 函数主要流程如下：
-#' \enumerate{
-#'   \item 检查 `flextable`、`officer`、`dplyr` 是否已安装；
-#'   \item 创建 Word 文档对象；
-#'   \item 根据 `page_orientation` 设置纵向或横向页面；
-#'   \item 解析数据源：优先使用 `model_list$Result`，否则使用 `data_list`；
-#'   \item 写入总标题 `"Statistical Report / 统计分析报告"`；
-#'   \item 若 `introduction` 非空，则写入引言；
-#'   \item 若 `report_text` 结构完整，则写入统计方法部分；
-#'   \item 若 `show_stat_table = TRUE`，写入 `report_text$TableMethod` 中的统计方法表；
-#'   \item 遍历每个结果模块，依次写入二级标题、结果说明、结果表格及表注；
-#'   \item 保存 Word 文件到 `output_path`。
+#' `data_list` 或 `model_list$Result` 中的每个元素应至少包含一个
+#' `cross_table` 数据框。例如：
+#'
+#' \preformatted{
+#' data_list <- list(
+#'   Baseline = list(
+#'     cross_table = data.frame(...)
+#'   )
+#' )
 #' }
 #'
-#' 表格格式规则：
-#' \itemize{
-#'   \item 默认移除所有边框后，添加顶部线、表头下横线、底部线；
-#'   \item 表头加粗并居中；
-#'   \item 若表中存在 `row_id` 列，则按 `row_id == 1` 识别主变量行；
-#'   \item 若存在 `Variable` 列，则优先将其作为左侧标签列；
-#'         否则若存在 `ROW` 列，则使用 `ROW`；
-#'         若都不存在，则使用第一列作为标签列；
-#'   \item 非主变量行的标签列会自动增加左缩进。
-#' }
+#' 如果表格中存在 `row_id` 列，函数会根据 `row_id` 对表格行进行格式化。
+#' 一般情况下，`row_id == 1` 的行会被视为主变量行，`row_id != 1`
+#' 的行会被视为分类水平行，并在 Word 表格中进行缩进显示。
 #'
-#' @return
-#' 函数主要作用是将 Word 文档写入 `output_path`。
-#' 当前版本不显式返回分析结果对象，通常返回 `NULL`（不可见）。
+#' 如果表格中存在 p 值列，例如 `pvalue`、`p_value`、`p.value`、`p`
+#' 或 `p值`，函数会将该列的表头统一显示为斜体 `P`。
+#'
+#' 对于表格单元格中以字母或星号结尾的统计值，函数会尝试将末尾的
+#' 标记设置为上标格式。这通常用于显示两两比较标记。
+#'
+#' 该函数依赖 `officer` 和 `flextable` 包生成 Word 文档和格式化表格。
+#'
+#' @return 不可见地返回 `output_path`。函数会在指定路径生成一个
+#'   Word `.docx` 文件。
 #'
 #' @seealso
-#' \code{\link[flextable]{flextable}},
-#' \code{\link[officer]{read_docx}},
-#' \code{\link[officer]{body_add_flextable}}
+#' [officer::read_docx()], [flextable::flextable()]
 #'
 #' @examples
 #' \dontrun{
-#' # 方式1：直接使用结果表列表
-#' SuperWord02(
-#'   data_list = Result1$result$table$model.res,
-#'   output_path = "D:/superword02_report.docx",
-#'   introduction = "This report summarizes the statistical analysis results."
+#' example_table <- data.frame(
+#'   Variable = c("Age", "Sex", "Male", "Female"),
+#'   Group1 = c("30.2 (5.1)", "", "50 (50.0%)", "50 (50.0%)"),
+#'   Group2 = c("31.4 (4.8)", "", "45 (45.0%)", "55 (55.0%)"),
+#'   P = c("0.120", "", "0.480", ""),
+#'   row_id = c(1, 1, 2, 2),
+#'   stringsAsFactors = FALSE
 #' )
 #'
-#' # 方式2：提供自动文字报告
-#' SuperWord02(
-#'   data_list = Result1$result$table$model.res,
-#'   output_path = "D:/superword02_auto_report.docx",
-#'   introduction = "This report summarizes the statistical analysis results.",
-#'   report_text = Result1$result$output.infor$word.text.res,
-#'   show_stat_table = TRUE
+#' data_list <- list(
+#'   Baseline = list(cross_table = example_table)
 #' )
 #'
-#' # 方式3：使用 model_list$Result
-#' SuperWord02(
-#'   model_list = list(Result = Result1$result$table$model.res),
-#'   output_path = "D:/superword02_model_report.docx",
-#'   show_stat_table = FALSE,
-#'   page_orientation = "landscape"
+#' output_file <- tempfile(fileext = ".docx")
+#'
+#' SuperWord.Super.Table(
+#'   data_list = data_list,
+#'   output_path = output_file,
+#'   introduction = "这是一个示例统计分析报告。"
 #' )
 #' }
 #'
 #' @export
-#'
-SuperWord02 <- function(
+SuperWord.Super.Table <- function(
     model_list = NULL,
     data_list = NULL,
     output_path,
@@ -184,6 +144,7 @@ SuperWord02 <- function(
     text.textcom.size = 12,
     text.table.caption.size = 12,
     text.table.content.size = 11,
+    text.table.superscript.size = 14,
     text.table.note.size = 10,
     line.title.spacing = 1,
     line.heading1.spacing = 1.2,
@@ -201,7 +162,9 @@ SuperWord02 <- function(
     text.table.content.family = "Times New Roman",
     text.table.note.family = "Times New Roman",
     pad.table.cell = 1,
-    page_orientation = c("portrait", "landscape")
+    page_orientation = c("portrait", "landscape"),
+    bilingual_layout = c("cn_then_en", "legacy"),
+    repeat_tables_in_english = FALSE
 ) {
   if (!requireNamespace("flextable", quietly = TRUE)) {
     stop("Package 'flextable' is required.", call. = FALSE)
@@ -209,22 +172,19 @@ SuperWord02 <- function(
   if (!requireNamespace("officer", quietly = TRUE)) {
     stop("Package 'officer' is required.", call. = FALSE)
   }
-  if (!requireNamespace("dplyr", quietly = TRUE)) {
-    stop("Package 'dplyr' is required.", call. = FALSE)
-  }
 
-  library(flextable)
-  library(officer)
-  library(dplyr)
+  `%||%` <- function(a, b) if (is.null(a)) b else a
 
   page_orientation <- match.arg(page_orientation)
-  doc <- read_docx()
+  bilingual_layout <- match.arg(bilingual_layout)
+
+  doc <- officer::read_docx()
 
   if (page_orientation == "landscape") {
-    doc <- body_set_default_section(
+    doc <- officer::body_set_default_section(
       doc,
-      prop_section(
-        page_size = page_size(orient = "landscape"),
+      officer::prop_section(
+        page_size = officer::page_size(orient = "landscape"),
         type = "continuous"
       )
     )
@@ -246,140 +206,128 @@ SuperWord02 <- function(
     x <- as.character(x)
     x <- x[!is.na(x)]
     x <- trimws(x)
-    x <- x[nzchar(x)]
-    x
+    x[nzchar(x)]
   }
 
   add_spacer <- function(doc) {
-    body_add_par(doc, "", style = "Normal")
+    officer::body_add_par(doc, "", style = "Normal")
+  }
+
+  add_title <- function(doc, text) {
+    doc <- officer::body_add_fpar(
+      doc,
+      officer::fpar(
+        officer::ftext(
+          as.character(text),
+          officer::fp_text(
+            font.family = text.title.family,
+            font.size = text.title.size,
+            bold = TRUE
+          )
+        ),
+        fp_p = officer::fp_par(
+          text.align = "center",
+          line_spacing = line.title.spacing
+        )
+      )
+    )
+    add_spacer(doc)
   }
 
   add_heading <- function(doc, text, level = 1, spacer_after = TRUE) {
     if (is.null(text) || !nzchar(trimws(as.character(text)))) return(doc)
+    fam <- if (level == 1) text.heading1.family else text.heading2.family
+    sz <- if (level == 1) text.heading1.size else text.heading2.size
+    sp <- if (level == 1) line.heading1.spacing else line.heading2.spacing
 
-    if (level == 1) {
-      doc <- body_add_fpar(
-        doc,
-        fpar(
-          ftext(
-            as.character(text),
-            fp_text(
-              font.family = text.heading1.family,
-              font.size = text.heading1.size,
-              bold = TRUE
-            )
-          ),
-          fp_p = fp_par(
-            text.align = "left",
-            line_spacing = line.heading1.spacing
-          )
-        )
+    doc <- officer::body_add_fpar(
+      doc,
+      officer::fpar(
+        officer::ftext(
+          as.character(text),
+          officer::fp_text(font.family = fam, font.size = sz, bold = TRUE)
+        ),
+        fp_p = officer::fp_par(text.align = "left", line_spacing = sp)
       )
-    } else {
-      doc <- body_add_fpar(
-        doc,
-        fpar(
-          ftext(
-            as.character(text),
-            fp_text(
-              font.family = text.heading2.family,
-              font.size = text.heading2.size,
-              bold = TRUE
-            )
-          ),
-          fp_p = fp_par(
-            text.align = "left",
-            line_spacing = line.heading2.spacing
-          )
-        )
-      )
-    }
-
-    if (isTRUE(spacer_after)) {
-      doc <- add_spacer(doc)
-    }
+    )
+    if (isTRUE(spacer_after)) doc <- add_spacer(doc)
     doc
   }
 
   add_paragraph <- function(doc, text, family, size, spacing = 1.3, bold = FALSE, spacer_after = TRUE) {
     if (is.null(text) || !nzchar(trimws(as.character(text)))) return(doc)
-
-    doc <- body_add_fpar(
+    doc <- officer::body_add_fpar(
       doc,
-      fpar(
-        ftext(
+      officer::fpar(
+        officer::ftext(
           as.character(text),
-          fp_text(
-            font.family = family,
-            font.size = size,
-            bold = bold
-          )
+          officer::fp_text(font.family = family, font.size = size, bold = bold)
         ),
-        fp_p = fp_par(
-          text.align = "justify",
-          line_spacing = spacing
-        )
+        fp_p = officer::fp_par(text.align = "justify", line_spacing = spacing)
       )
     )
-
-    if (isTRUE(spacer_after)) {
-      doc <- add_spacer(doc)
-    }
+    if (isTRUE(spacer_after)) doc <- add_spacer(doc)
     doc
   }
 
-  add_paragraph_block <- function(doc, text_vec, family, size, spacing = 1.3, bold = FALSE, spacer_after_block = TRUE) {
+  collapse_to_paragraph <- function(text_vec, lang = c("auto", "cn", "en")) {
+    lang <- match.arg(lang)
     txts <- normalize_text_block(text_vec)
-    if (length(txts) == 0) return(doc)
+    if (length(txts) == 0) return(character(0))
+    if (length(txts) == 1) return(txts)
 
-    for (i in seq_along(txts)) {
-      doc <- add_paragraph(
-        doc,
-        txts[i],
-        family = family,
-        size = size,
-        spacing = spacing,
-        bold = bold,
-        spacer_after = FALSE
-      )
+    if (identical(lang, "en")) {
+      return(paste(txts, collapse = " "))
+    }
+    if (identical(lang, "cn")) {
+      return(paste0(txts, collapse = ""))
     }
 
-    if (isTRUE(spacer_after_block)) {
-      doc <- add_spacer(doc)
-    }
+    has_cn <- any(grepl("[\u4e00-\u9fff]", txts, perl = TRUE))
+    if (isTRUE(has_cn)) paste0(txts, collapse = "") else paste(txts, collapse = " ")
+  }
+
+  add_paragraph_block <- function(doc, text_vec, family, size, spacing = 1.3, bold = FALSE,
+                                  spacer_after_block = TRUE, lang = c("auto", "cn", "en")) {
+    lang <- match.arg(lang)
+    paragraph <- collapse_to_paragraph(text_vec, lang = lang)
+    if (length(paragraph) == 0 || !nzchar(trimws(paragraph))) return(doc)
+
+    doc <- add_paragraph(
+      doc,
+      paragraph,
+      family = family,
+      size = size,
+      spacing = spacing,
+      bold = bold,
+      spacer_after = FALSE
+    )
+    if (isTRUE(spacer_after_block)) doc <- add_spacer(doc)
     doc
   }
 
   add_table_caption <- function(doc, text, spacer_after = TRUE) {
     if (is.null(text) || !nzchar(trimws(as.character(text)))) return(doc)
-
-    doc <- body_add_fpar(
+    doc <- officer::body_add_fpar(
       doc,
-      fpar(
-        ftext(
+      officer::fpar(
+        officer::ftext(
           as.character(text),
-          fp_text(
+          officer::fp_text(
             font.family = text.table.caption.family,
             font.size = text.table.caption.size,
             bold = TRUE
           )
         ),
-        fp_p = fp_par(
-          text.align = "center",
-          line_spacing = line.caption.spacing
-        )
+        fp_p = officer::fp_par(text.align = "center", line_spacing = line.caption.spacing)
       )
     )
-
-    if (isTRUE(spacer_after)) {
-      doc <- add_spacer(doc)
-    }
+    if (isTRUE(spacer_after)) doc <- add_spacer(doc)
     doc
   }
 
   format_ft_by_rowid <- function(ft, df) {
     has_row_id <- "row_id" %in% colnames(df)
-
     row_label_col <- if ("Variable" %in% colnames(df)) {
       "Variable"
     } else if ("ROW" %in% colnames(df)) {
@@ -390,93 +338,113 @@ SuperWord02 <- function(
 
     if (has_row_id) {
       other_cols <- setdiff(colnames(df), c("row_id", row_label_col))
-
-      ft <- ft %>%
-        bold(i = ~ row_id == 1, j = row_label_col, bold = TRUE, part = "body") %>%
-        align(i = ~ row_id == 1, j = row_label_col, align = "left", part = "body")
-
-      if (length(other_cols) > 0) {
-        ft <- ft %>%
-          align(i = ~ row_id == 1, j = other_cols, align = "center", part = "body")
-      }
-
-      ft <- ft %>%
-        align(i = ~ row_id != 1, j = row_label_col, align = "left", part = "body") %>%
-        padding(i = ~ row_id != 1, j = row_label_col, padding.left = 24, part = "body")
-
-      if (length(other_cols) > 0) {
-        ft <- ft %>%
-          align(i = ~ row_id != 1, j = other_cols, align = "center", part = "body")
-      }
-
-      ft <- ft %>% delete_columns(j = "row_id")
+      ft <- flextable::bold(ft, i = ~ row_id == 1, j = row_label_col, bold = TRUE, part = "body")
+      ft <- flextable::align(ft, i = ~ row_id == 1, j = row_label_col, align = "left", part = "body")
+      if (length(other_cols) > 0) ft <- flextable::align(ft, i = ~ row_id == 1, j = other_cols, align = "center", part = "body")
+      ft <- flextable::align(ft, i = ~ row_id != 1, j = row_label_col, align = "left", part = "body")
+      ft <- flextable::padding(ft, i = ~ row_id != 1, j = row_label_col, padding.left = 24, part = "body")
+      if (length(other_cols) > 0) ft <- flextable::align(ft, i = ~ row_id != 1, j = other_cols, align = "center", part = "body")
+      ft <- flextable::delete_columns(ft, j = "row_id")
     } else {
       other_cols <- setdiff(colnames(df), row_label_col)
+      ft <- flextable::align(ft, j = row_label_col, align = "left", part = "body")
+      if (length(other_cols) > 0) ft <- flextable::align(ft, j = other_cols, align = "center", part = "body")
+    }
+    ft
+  }
 
-      ft <- ft %>%
-        align(j = row_label_col, align = "left", part = "body")
+  apply_pairwise_mark_superscript <- function(ft, df) {
+    special_cols <- c("row_id", "ROW", "Variable", "statistic", "pvalue", "Stat", "P", "SMD", "95%CI")
+    target_cols <- setdiff(colnames(df), special_cols)
+    target_cols <- target_cols[target_cols %in% ft$col_keys]
+    if (length(target_cols) == 0) return(ft)
 
-      if (length(other_cols) > 0) {
-        ft <- ft %>%
-          align(j = other_cols, align = "center", part = "body")
+    normal_prop <- officer::fp_text(font.family = text.table.content.family, font.size = text.table.content.size)
+    super_prop <- officer::fp_text(
+      font.family = text.table.content.family,
+      font.size = if (is.null(text.table.superscript.size)) text.table.content.size else text.table.superscript.size,
+      vertical.align = "superscript"
+    )
+
+    for (j_col in target_cols) {
+      for (i_row in seq_len(nrow(df))) {
+        val <- as.character(df[[j_col]][i_row])
+        if (is.na(val) || !nzchar(val)) next
+        m <- regexec("^(.+[0-9\\)\\]%])([A-Za-z*]+)$", val, perl = TRUE)
+        hit <- regmatches(val, m)[[1]]
+        if (length(hit) == 3) {
+          ft <- flextable::compose(
+            ft,
+            i = i_row,
+            j = j_col,
+            value = flextable::as_paragraph(
+              flextable::as_chunk(hit[2], props = normal_prop),
+              flextable::as_chunk(hit[3], props = super_prop)
+            ),
+            part = "body"
+          )
+        }
       }
     }
-
     ft
   }
 
   build_ft <- function(df) {
-    flextable(df) %>%
-      border_remove() %>%
-      hline_top(part = "all", border = fp_border(color = "black", width = hline.top.table)) %>%
-      hline_bottom(part = "header", border = fp_border(color = "black", width = hline.middle.table)) %>%
-      hline_bottom(part = "all", border = fp_border(color = "black", width = hline.bottom.table)) %>%
-      font(part = "all", fontname = text.table.content.family) %>%
-      fontsize(part = "all", size = text.table.content.size) %>%
-      bold(part = "header", bold = TRUE) %>%
-      align(part = "header", align = "center") %>%
-      padding(part = "all", padding = pad.table.cell) %>%
-      set_table_properties(layout = "autofit", width = 1)
+    ft <- flextable::flextable(df)
+    ft <- flextable::border_remove(ft)
+    ft <- flextable::hline_top(ft, part = "all", border = officer::fp_border(color = "black", width = hline.top.table))
+    ft <- flextable::hline_bottom(ft, part = "header", border = officer::fp_border(color = "black", width = hline.middle.table))
+    ft <- flextable::hline_bottom(ft, part = "all", border = officer::fp_border(color = "black", width = hline.bottom.table))
+    ft <- flextable::font(ft, part = "all", fontname = text.table.content.family)
+    ft <- flextable::fontsize(ft, part = "all", size = text.table.content.size)
+    ft <- flextable::bold(ft, part = "header", bold = TRUE)
+    ft <- flextable::align(ft, part = "header", align = "center")
+    ft <- flextable::padding(ft, part = "all", padding = pad.table.cell)
+    ft <- flextable::set_table_properties(ft, layout = "autofit", width = 1)
+
+    p_cols <- colnames(df)[tolower(trimws(colnames(df))) %in% c("pvalue", "p_value", "p.value", "p", "p值")]
+    if (length(p_cols) > 0) {
+      ft <- flextable::set_header_labels(ft, values = stats::setNames(rep("P", length(p_cols)), p_cols))
+      ft <- flextable::italic(ft, j = p_cols, italic = TRUE, part = "header")
+    }
+    ft
   }
 
-  doc <- body_add_fpar(
-    doc,
-    fpar(
-      ftext(
-        "Statistical Report / 统计分析报告",
-        fp_text(
-          font.family = text.title.family,
-          font.size = text.title.size,
-          bold = TRUE
-        )
-      ),
-      fp_p = fp_par(
-        text.align = "center",
-        line_spacing = line.title.spacing
-      )
-    )
-  )
-  doc <- add_spacer(doc)
-
-  if (nzchar(trimws(as.character(introduction)))) {
-    doc <- add_paragraph(
-      doc,
-      introduction,
-      family = text.intro.family,
-      size = text.intro.size,
-      spacing = line.intro.spacing,
-      bold = FALSE,
-      spacer_after = TRUE
-    )
+  get_method_tables <- function(lang = c("cn", "en")) {
+    lang <- match.arg(lang)
+    tm <- if (!is.null(report_text)) report_text$TableMethod else NULL
+    if (is.null(tm) || length(tm) == 0) return(list())
+    nm <- names(tm)
+    if (is.null(nm)) nm <- paste0("Table ", seq_along(tm))
+    if (lang == "cn") {
+      idx <- grepl("^表|统计学方法", nm)
+      if (!any(idx)) idx <- seq_along(tm) == 1
+    } else {
+      idx <- grepl("^Table|Statistical", nm, ignore.case = TRUE)
+      if (!any(idx)) idx <- seq_along(tm) == length(tm)
+    }
+    out <- tm[idx]
+    names(out) <- nm[idx]
+    out
   }
 
-  if (use_auto_report) {
+  get_table_names <- function() {
+    table_names <- names(final_data_list)
+    if (is.null(table_names) || length(table_names) == 0) {
+      table_names <- paste0("Table_", seq_along(final_data_list))
+      names(final_data_list) <<- table_names
+    }
+    table_names
+  }
+
+  render_method_section <- function(doc, lang = c("cn", "en")) {
+    lang <- match.arg(lang)
+    if (!isTRUE(use_auto_report)) return(doc)
     meth <- report_text$Methods
-    doc <- add_heading(doc, meth$heading1 %||% "Statistical Methods / 统计学方法", level = 1, spacer_after = TRUE)
-
+    doc <- add_heading(doc, if (lang == "cn") "统计学方法" else "Statistical Methods", level = 1, spacer_after = TRUE)
     doc <- add_paragraph_block(
       doc,
-      meth$chinese,
+      if (lang == "cn") meth$chinese else meth$english,
       family = text.intro.family,
       size = text.intro.size,
       spacing = line.intro.spacing,
@@ -484,116 +452,143 @@ SuperWord02 <- function(
       spacer_after_block = TRUE
     )
 
-    doc <- add_paragraph_block(
-      doc,
-      meth$english,
-      family = text.intro.family,
-      size = text.intro.size,
-      spacing = line.intro.spacing,
-      bold = FALSE,
-      spacer_after_block = TRUE
+    if (isTRUE(show_stat_table)) {
+      mt <- get_method_tables(lang)
+      if (length(mt) > 0) {
+        for (i in seq_along(mt)) {
+          doc <- add_table_caption(doc, names(mt)[i], spacer_after = TRUE)
+          ft_tmp <- build_ft(as.data.frame(mt[[i]], stringsAsFactors = FALSE))
+          ft_tmp <- flextable::align(ft_tmp, part = "body", align = "center")
+          doc <- flextable::body_add_flextable(doc, ft_tmp)
+          doc <- add_spacer(doc)
+        }
+      }
+    }
+    doc
+  }
+
+  render_results_section <- function(doc, lang = c("cn", "en"), include_tables = TRUE) {
+    lang <- match.arg(lang)
+    table_names <- get_table_names()
+
+    if (isTRUE(use_auto_report)) {
+      doc <- add_heading(doc, if (lang == "cn") "结果概述" else "Results Summary", level = 1, spacer_after = TRUE)
+    }
+
+    for (tabid in seq_along(table_names)) {
+      nm <- table_names[tabid]
+      if (tabid > 1) doc <- officer::body_add_break(doc)
+
+      doc <- add_heading(
+        doc,
+        if (lang == "cn") paste0("按", nm, "分组的结果") else paste0("Results for ", nm),
+        level = 2,
+        spacer_after = TRUE
+      )
+
+      if (isTRUE(use_auto_report) && !is.null(report_text$Results[[nm]])) {
+        sec <- report_text$Results[[nm]]
+        doc <- add_paragraph_block(
+          doc,
+          if (lang == "cn") sec$chinese else sec$english,
+          family = text.textcom.family,
+          size = text.textcom.size,
+          spacing = line.textcom.spacing,
+          bold = FALSE,
+          spacer_after_block = TRUE
+        )
+      }
+
+      if (isTRUE(include_tables)) {
+        df <- as.data.frame(final_data_list[[nm]]$cross_table, stringsAsFactors = FALSE)
+        doc <- add_table_caption(
+          doc,
+          if (lang == "cn") paste0("表 ", tabid, ". ", nm) else paste0("Table ", tabid, ". ", nm),
+          spacer_after = TRUE
+        )
+        ft <- build_ft(df)
+        ft <- format_ft_by_rowid(ft, df)
+        ft <- apply_pairwise_mark_superscript(ft, df)
+        doc <- flextable::body_add_flextable(doc, ft)
+
+        if (isTRUE(use_auto_report) && !is.null(report_text$TableNotes[[nm]])) {
+          tn <- report_text$TableNotes[[nm]]
+          doc <- add_paragraph_block(
+            doc,
+            if (lang == "cn") tn$chinese else tn$english,
+            family = text.table.note.family,
+            size = text.table.note.size,
+            spacing = line.table.note.spacing,
+            bold = FALSE,
+            spacer_after_block = FALSE
+          )
+        }
+
+        if (!is.null(table_comments)) {
+          cm <- if (!is.null(names(table_comments)) && nm %in% names(table_comments)) table_comments[[nm]] else NULL
+          if (!is.null(cm)) {
+            doc <- add_paragraph_block(
+              doc,
+              cm,
+              family = text.table.note.family,
+              size = text.table.note.size,
+              spacing = line.table.note.spacing,
+              bold = FALSE,
+              spacer_after_block = FALSE
+            )
+          }
+        }
+      } else {
+        doc <- add_paragraph(
+          doc,
+          "Detailed tables are presented in the Chinese section above.",
+          family = text.table.note.family,
+          size = text.table.note.size,
+          spacing = line.table.note.spacing,
+          bold = FALSE,
+          spacer_after = FALSE
+        )
+      }
+    }
+    doc
+  }
+
+  if (identical(bilingual_layout, "legacy")) {
+    # Backward-compatible, compact behavior: still uses the new title but keeps all tables only once.
+    doc <- add_title(doc, "Statistical Report / 统计分析报告")
+    if (nzchar(trimws(as.character(introduction)))) {
+      doc <- add_paragraph(doc, introduction, family = text.intro.family, size = text.intro.size, spacing = line.intro.spacing)
+    }
+    doc <- render_method_section(doc, "cn")
+    if (use_auto_report && length(report_text$Methods$english) > 0) {
+      doc <- add_paragraph_block(doc, report_text$Methods$english, family = text.intro.family, size = text.intro.size, spacing = line.intro.spacing)
+    }
+    doc <- officer::body_add_break(doc)
+    doc <- render_results_section(doc, "cn", include_tables = TRUE)
+  } else {
+    doc <- add_title(doc, "统计分析报告")
+    if (nzchar(trimws(as.character(introduction)))) {
+      doc <- add_paragraph(doc, introduction, family = text.intro.family, size = text.intro.size, spacing = line.intro.spacing)
+    }
+    doc <- render_method_section(doc, "cn")
+    doc <- officer::body_add_break(doc)
+    doc <- render_results_section(doc, "cn", include_tables = TRUE)
+
+    has_english <- isTRUE(use_auto_report) && (
+      length(normalize_text_block(report_text$Methods$english)) > 0 ||
+        any(vapply(report_text$Results, function(x) length(normalize_text_block(x$english)) > 0, logical(1)))
     )
-  }
 
-  table_method <- report_text$TableMethod
-  if (show_stat_table) {
-    if (is.null(table_method) || length(table_method) == 0) {
-      stop("table_method is empty.", call. = FALSE)
+    if (isTRUE(has_english)) {
+      doc <- officer::body_add_break(doc)
+      doc <- add_title(doc, "Statistical Report")
+      doc <- render_method_section(doc, "en")
+      doc <- officer::body_add_break(doc)
+      doc <- render_results_section(doc, "en", include_tables = isTRUE(repeat_tables_in_english))
     }
-
-    method_names <- names(table_method)
-    if (is.null(method_names) || any(method_names == "")) {
-      method_names <- paste0("Table ", seq_along(table_method))
-    }
-
-    for (i in seq_along(table_method)) {
-      stat_df <- table_method[[i]]
-      stat_title <- method_names[i]
-
-      doc <- add_table_caption(doc, stat_title, spacer_after = TRUE)
-      ft_tmp <- build_ft(stat_df) %>% align(part = "body", align = "center")
-      doc <- body_add_flextable(doc, ft_tmp)
-      doc <- add_spacer(doc)
-    }
-
-    doc <- body_add_break(doc)
-  }
-
-  if (use_auto_report && !is.null(report_text$Results)) {
-    doc <- add_heading(doc, "Results Summary / 结果概述", level = 1, spacer_after = TRUE)
-  }
-
-  tabid <- 1
-  table_names <- names(final_data_list)
-
-  for (nm in table_names) {
-    if (tabid > 1) {
-      doc <- body_add_break(doc)
-    }
-
-    doc <- add_heading(doc, paste0("Results for ", nm, " / ", nm, " 的结果"), level = 2, spacer_after = TRUE)
-
-    if (use_auto_report && !is.null(report_text$Results[[nm]])) {
-      sec <- report_text$Results[[nm]]
-
-      doc <- add_paragraph_block(
-        doc,
-        sec$chinese,
-        family = text.textcom.family,
-        size = text.textcom.size,
-        spacing = line.textcom.spacing,
-        bold = FALSE,
-        spacer_after_block = TRUE
-      )
-
-      doc <- add_paragraph_block(
-        doc,
-        sec$english,
-        family = text.textcom.family,
-        size = text.textcom.size,
-        spacing = line.textcom.spacing,
-        bold = FALSE,
-        spacer_after_block = TRUE
-      )
-    }
-
-    df <- as.data.frame(final_data_list[[nm]]$cross_table, stringsAsFactors = FALSE)
-
-    doc <- add_table_caption(doc, paste0("Table ", tabid, ". ", nm), spacer_after = TRUE)
-
-    ft <- build_ft(df)
-    ft <- format_ft_by_rowid(ft, df)
-
-    doc <- body_add_flextable(doc, ft)
-
-    # 这里不再插入空行，确保表格和表注紧贴
-    if (use_auto_report && !is.null(report_text$TableNotes[[nm]])) {
-      tn <- report_text$TableNotes[[nm]]
-
-      doc <- add_paragraph_block(
-        doc,
-        tn$chinese,
-        family = text.table.note.family,
-        size = text.table.note.size,
-        spacing = line.table.note.spacing,
-        bold = FALSE,
-        spacer_after_block = FALSE
-      )
-
-      doc <- add_paragraph_block(
-        doc,
-        tn$english,
-        family = text.table.note.family,
-        size = text.table.note.size,
-        spacing = line.table.note.spacing,
-        bold = FALSE,
-        spacer_after_block = FALSE
-      )
-    }
-
-    tabid <- tabid + 1
   }
 
   print(doc, target = output_path)
   message("Word report generated successfully: ", output_path)
+  invisible(output_path)
 }
