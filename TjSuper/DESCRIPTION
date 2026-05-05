@@ -1,14 +1,41 @@
 Package: TjSuper
-Title: What the Package Does (One Line, Title Case)
+Title: Tools for Advanced Medical Statistics and Biomedical Research
 Version: 0.1.0
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person(
+        given = "Tjssn",
+        family = "Development Team",
+        email = "tongjibbb@163.com",
+        role = c("aut", "cre")
+    )
+Description: Provides an integrated toolkit for advanced medical statistics,
+    clinical research analytics, machine learning, deep learning, automated
+    statistical table generation, weighted analysis, standardized mean
+    difference analysis, data visualization, example datasets, and standardized
+    Word report generation. The package aims to support a wide range of
+    biomedical research workflows, including clinical medicine, public health,
+    epidemiology, psychology, nursing, laboratory medicine, and real-world
+    data analysis.
+License: MIT + file LICENSE
+URL: https://study.tjbbb.com
+BugReports: https://study.tjbbb.com
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Depends: 
-    R (>= 3.5)
+    R (>= 4.1.0)
+Imports:
+    dplyr,
+    officer,
+    flextable,
+    httr,
+    ggplot2,
+    stringr,
+    readxl,
+    openxlsx
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+Config/testthat/edition: 3
 LazyData: true
