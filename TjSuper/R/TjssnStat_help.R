@@ -83,7 +83,7 @@ TjssnStat_help <- function(Stat = NULL, package = "TjSuper") {
   topic <- registry$Topic[matched[1]]
 
   help_obj <- tryCatch(
-    utils::help(topic, package = package),
+    do.call(utils::help, list(topic = topic, package = package)),
     error = function(e) NULL
   )
 
@@ -91,29 +91,16 @@ TjssnStat_help <- function(Stat = NULL, package = "TjSuper") {
     stop(
       "找不到帮助主题：", topic, "\n\n",
       "请确认：\n",
-      "1. 已经为该 Stat 创建对应的帮助页；\n",
-      "2. 帮助页中包含 `@name ", topic, "`；\n",
-      "3. 已经运行 `devtools::document()`。\n",
+      "1. 文件 `R/help-Super.Table.R` 是否存在；\n",
+      "2. 帮助页中是否包含 `@name ", topic, "`；\n",
+      "3. 帮助页最后是否有一行 `NULL`；\n",
+      "4. 是否已经运行 `devtools::document()`；\n",
+      "5. 是否生成了 `man/", topic, ".Rd`；\n",
+      "6. 如果你是从 GitHub 安装后测试，是否已经重新安装最新版。\n",
       call. = FALSE
     )
   }
 
   print(help_obj)
   invisible(help_obj)
-}
-
-
-.tjssnstat_registry <- function() {
-  data.frame(
-    Stat = c(
-      "Super.Table"
-    ),
-    Topic = c(
-      "TjssnStat-Super.Table"
-    ),
-    Title = c(
-      "Table 1、描述性统计、组间比较、SMD、加权分析"
-    ),
-    stringsAsFactors = FALSE
-  )
 }
